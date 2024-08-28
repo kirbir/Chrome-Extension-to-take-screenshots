@@ -1,0 +1,23 @@
+#capture-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+#capture-btn svg {
+  width: 32px;
+  height: 32px;
+}
+
+#drag-capture-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+  }
+  
+  #drag-capture-btn svg {
+    width: 32px;
+    height: 32px;
+  }

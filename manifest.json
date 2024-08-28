@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Emoji Screenshot",
+  "version": "1.0",
+  "description": "Capture screenshots and add emojis to them",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "pages/Popup/index.html",
+    "default_icon": {
+      "34": "assets/img/icon-34.png"
+    }
+  },
+  "icons": {
+    "34": "assets/img/icon-34.png",
+    "128": "assets/img/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["pages/content/index.js"]
+    }
+  ]
+}
