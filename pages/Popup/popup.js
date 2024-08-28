@@ -105,35 +105,6 @@ function shareScreenshot() {
 // Existing comment (you can remove this if you want)
 // Add function to save or share the modified image
 
-document.getElementById('drag-capture-btn').addEventListener('click', () => {
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    chrome.scripting.executeScript({
-      target: { tabId: tabs[0].id },
-      files: ['pages/Content/index.js']
-    }, () => {
-      if (chrome.runtime.lastError) {
-        console.error('Script injection failed:', chrome.runtime.lastError.message);
-      } else {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "prepareDragCapture"}, (response) => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-          } else {
-            console.log("Message sent successfully");
-            window.close(); // Close the popup to allow interaction with the page
-          }
-        });
-      }
-    });
-  });
-});
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "dragCaptureComplete") {
-    console.log("Captured area:", request.area);
-    captureScreenshotArea(request.area);
-  }
-});
-
 function captureScreenshotArea(area) {
   chrome.tabs.captureVisibleTab(null, {format: 'png'}, function(dataUrl) {
     const canvas = document.getElementById('screenshot-canvas');
@@ -146,8 +117,47 @@ function captureScreenshotArea(area) {
       canvas.style.display = 'block';
       document.getElementById('emoji-selector').style.display = 'block';
       document.getElementById('save-btn').style.display = 'block';
+      document.getElementById('share-btn').style.display = 'block';
       setupEmojiSelector();
     };
     img.src = dataUrl;
   });
 }
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "captureArea") {
+    captureScreenshotArea(request.area);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('capture-btn').addEventListener('click', captureScreenshot);
+  document.getElementById('drag-capture-btn').addEventListener('click', function() {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, {action: "prepareDragCapture"}, function(response) {
+          if (chrome.runtime.lastError) {
+            console.log("Error sending message:", chrome.runtime.lastError.message);
+            // Handle the error (e.g., show a message to the user)
+          } else {
+            window.close(); // Close the popup only if the message was sent successfully
+          }
+        });
+      } else {
+        console.log("No active tab found");
+        // Handle the case where no active tab is found
+      }
+    });
+  });
+  document.getElementById('save-btn').addEventListener('click', saveScreenshot);
+  document.getElementById('share-btn').addEventListener('click', shareScreenshot);
+
+  // Check if there's drag capture data available
+  chrome.runtime.sendMessage({action: "getDragCaptureData"}, function(response) {
+    if (chrome.runtime.lastError) {
+      console.log("Error getting drag capture data:", chrome.runtime.lastError.message);
+    } else if (response) {
+      captureScreenshotArea(response);
+    }
+  });
+});

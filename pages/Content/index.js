@@ -1,16 +1,16 @@
-
+console.log('Content script loaded');
 console.log('Content script works!');
 console.log('Must reload extension for modifications to take effect.');
-
 
 let isSelecting = false;
 let startX, startY, endX, endY;
 let selectionBox;
+let instructions;
 
 function prepareDragCapture() {
   document.body.style.cursor = 'crosshair';
   
-  const instructions = document.createElement('div');
+  instructions = document.createElement('div');
   instructions.textContent = 'Click and drag to select an area';
   instructions.style.position = 'fixed';
   instructions.style.top = '10px';
@@ -66,8 +66,9 @@ function onMouseUp() {
   };
 
   chrome.runtime.sendMessage({action: "dragCaptureComplete", area: area});
+
   selectionBox.remove();
-  document.querySelector('div').remove(); // Remove instructions
+  instructions.remove();
 }
 
 function updateSelectionBox() {
